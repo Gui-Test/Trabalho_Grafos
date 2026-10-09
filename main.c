@@ -18,7 +18,9 @@ double distancia_euclidiana(Planta flor1, Planta flor2);
 
 int main(){
     Planta flor[Tam];
+    double maior_DE = 0.0, menor_DE = 2132103215464;
     int mat_adja[Tam][Tam];
+    
     zera(mat_adja);
 
     FILE *f;
@@ -60,6 +62,14 @@ int main(){
             //calculo da distancia lá
             double din = distancia_euclidiana(flor[i],flor[j]);
             //agora precisamos descobrir como normalizar isso...
+
+            if(din>maior_DE){
+                maior_DE = din;
+            }
+            if(din<menor_DE){
+                menor_DE = din;
+            }
+            
             
         }
     }
