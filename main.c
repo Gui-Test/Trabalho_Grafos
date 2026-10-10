@@ -13,13 +13,20 @@ typedef struct planta{
     double ptwid;
 } Planta;
 
-int zera(int mat[Tam][Tam]);
+typedef struct cordenada{
+    int i;
+    int j;
+} Cord;
+
+double zera(double mat[Tam][Tam]);
 double distancia_euclidiana(Planta flor1, Planta flor2);
+double normaliza(double din, double min, double max);
 
 int main(){
     Planta flor[Tam];
-    double maior_DE = 0.0, menor_DE = 2132103215464;
-    int mat_adja[Tam][Tam];
+    Cord comaior_DE,comenor_DE,comaior_DEN,comenor_DEN;
+    double maior_DE = 0.0, menor_DE = 2132103215464, maior_DEN=0.0, menor_DEN=2132103215464;
+    double mat_adja[Tam][Tam];
     
     zera(mat_adja);
 
@@ -65,18 +72,44 @@ int main(){
 
             if(din>maior_DE){
                 maior_DE = din;
+                comaior_DE.i = i;
+                comaior_DE.j = j;
             }
             if(din<menor_DE){
                 menor_DE = din;
+                comenor_DE.i = i;
+                comenor_DE.j = j;
             }
             
+            mat_adja[i][j] = din;
+            
+        }
+    }
+
+    for(int i=0; i<Tam ; i++){
+        for(int j=0; j<Tam ; j++){
+            //normalização
+            double din = normaliza(mat_adja[i][j],menor_DE, maior_DE);
+
+            if(din>maior_DEN){
+                maior_DEN = din;
+                comaior_DEN.i = i;
+                comaior_DEN.j = j;
+            }
+            if(din<menor_DEN){
+                menor_DEN = din;
+                comenor_DEN.i = i;
+                comenor_DEN.j = j;
+            }
+            
+            mat_adja[i][j] = din;
             
         }
     }
 
 }
 
-int zera(int mat[Tam][Tam]){
+double zera(double mat[Tam][Tam]){
     for(int i=0; i<Tam ; i++){
         for(int j=0; j<Tam ; j++){
             mat[i][j] = 0;
@@ -89,4 +122,8 @@ double distancia_euclidiana(Planta flor1, Planta flor2){
     + pow((flor1.ptlen - flor2.ptlen),2) + pow((flor1.ptwid - flor2.ptwid),2));
 
     return dis;
+}
+
+double normaliza(double din, double min, double max){
+    return (din-min)/(max-min);
 }
