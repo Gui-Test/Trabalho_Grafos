@@ -24,7 +24,7 @@ void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, int mat_adj
 int main(){
     Planta flor[Tam];
     double maior_DE = 0.0, menor_DE = 2132103215464, maior_DENorm = 0.0, menor_DENorm = 2132103215464;
-    int vertMaiorDist[2], vertMenorDist[2], vertMaiorDistNorm[2], vertMenorDistNorm[2];
+    int vertMaiorDist[2] = {1,1}, vertMenorDist[2]= {1,1}, vertMaiorDistNorm[2] = {1,1}, vertMenorDistNorm[2] = {1,1};
     int mat_adja[Tam][Tam], numVerticies = 0;
     
     zera(mat_adja);
@@ -66,43 +66,14 @@ int main(){
     }
 
     distEucIt(flor,&menor_DE, &maior_DE, vertMenorDist, vertMaiorDist);
-    printf("Maior Dist: %f e Menor Dist: %f\n", maior_DE, menor_DE);
+    printf("Maior Dist: %f (%i - %i) e Menor Dist: %f\n", maior_DE, vertMaiorDist[0], vertMaiorDist[1], menor_DE);
     distEucItNorm(flor,menor_DE, maior_DE, mat_adja, &menor_DENorm, &maior_DENorm, vertMenorDistNorm, vertMaiorDistNorm);
 
     
 
     //------------ vai ser a função para colocar o grafo no csv -------------
-    /*
-    f = fopen("grafo.csv", "w");
-    char linha[250];
-    char *bloco;
-
-    if(f == NULL){
-        printf("Arquivo Iris não encontrado");
-        return 1;
-    }
-    */
-
-    //fprintf(f, );
-
-    for(int i=0;i<Tam;i++){
-        
-        //printf("%s\n", bloco);
-        //sscanf(bloco,"%c", &flor[i].especie);
-        
-
-        /*
-        printf("%lf\n", flor[i].splen);
-        printf("%lf\n", flor[i].spwid);
-        printf("%lf\n", flor[i].ptlen);
-        printf("%lf\n\n", flor[i].ptwid);
-        */
-        
-    }
-
     
-
-    fclose(f);
+    
 
     
 
@@ -123,15 +94,24 @@ void distEucIt(Planta flor[], double* menor_DE, double* maior_DE, int vertsMenor
             if(din< *menor_DE){
                 *menor_DE = din;
                 vertsMenor[0] = flor[i].numVert;
-                vertsMaior[1] = flor[j].numVert;
+                vertsMenor[1] = flor[j].numVert;
             }
             
-            mat_adja[i][j] = din;
+            //mat_adja[i][j] = din;
             
         }
     }
+}
 
 void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
+    
+    FILE *f = fopen("grafoParaPython.csv", "w");
+
+    if(f == NULL){
+        printf("Arquivo grafo não encontrado");
+        
+    }
+
     for(int i=0; i<Tam ; i++){
         for(int j= i; j<Tam ; j++){
             //calculo da distancia lá
@@ -140,8 +120,10 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja
             if( i != j){
                 double din = distancia_euclidiana_norm(flor[i],flor[j], menor_DE, maior_DE);
                 if(din <= 0.3){
+                    //printf("%f - ", din);
                     mat_adja[i][j] = 1;
                     mat_adja[j][i] = 1;
+                    fprintf(f,"%i %i\n",flor[i].numVert,flor[j].numVert);
                 }else{
                     mat_adja[i][j] = 0;
                     mat_adja[j][i] = 0;
@@ -155,7 +137,7 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja
                 if(din< *menor_DENorm){
                     *menor_DENorm = din;
                     vertsMenorNorm[0] = flor[i].numVert;
-                    vertsMaiorNorm[1] = flor[j].numVert;
+                    vertsMenorNorm[1] = flor[j].numVert;
                 }
 
             }else{
@@ -169,6 +151,7 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja
             
         }
     }
+    fclose(f);
 
 }
 
