@@ -126,11 +126,10 @@ void distEucIt(Planta flor[], double* menor_DE, double* maior_DE, int vertsMenor
                 vertsMaior[1] = flor[j].numVert;
             }
             
+            mat_adja[i][j] = din;
             
         }
     }
-
-}
 
 void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
     for(int i=0; i<Tam ; i++){
