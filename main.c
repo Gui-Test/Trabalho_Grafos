@@ -17,9 +17,9 @@ typedef struct planta{
 
 void zera(double mat[Tam][Tam]);
 double distancia_euclidiana(Planta flor1, Planta flor2);
-double distancia_euclidiana_norm(Planta flor1, Planta flor2, double menor_DE, double maior_DE);
-void distEucIt(Planta flor[],double* menor_DE, double* maior_DE,double mat_adja[Tam][Tam], int vertsMenor[2], int vertsMaior[2]);
-void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, double mat_adja[Tam][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
+double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE);
+void distEucIt(Planta flor[],double* menor_DE, double* maior_DE,double mat_adja[][Tam], int vertsMenor[2], int vertsMaior[2]);
+void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, double mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
 void graus(double mat_adja[Tam][Tam], int *max_grau, int *min_grau);
 
 int main(){
@@ -132,7 +132,7 @@ int main(){
 
 
 
-void distEucIt(Planta flor[], double* menor_DE, double* maior_DE,double mat_adja[Tam][Tam], int vertsMenor[2], int vertsMaior[2]){
+void distEucIt(Planta flor[], double* menor_DE, double* maior_DE,double mat_adja[][Tam], int vertsMenor[2], int vertsMaior[2]){
     for(int i=0; i<Tam ; i++){
         for(int j=i + 1; j<Tam ; j++){
             //calculo da distancia lá
@@ -157,7 +157,7 @@ void distEucIt(Planta flor[], double* menor_DE, double* maior_DE,double mat_adja
     }
 }
 
-void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
+void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, double mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
     
     FILE *f = fopen("grafoParaPython.csv", "w");
 
@@ -170,9 +170,8 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja
         for(int j= i; j<Tam ; j++){
             //calculo da distancia lá
             
-
             if(i != j){
-                double din = distancia_euclidiana_norm(flor[i],flor[j], menor_DE, maior_DE);
+                double din = distancia_euclidiana_norm(mat_adja[i][j], menor_DE, maior_DE);
                 if(din <= 0.3){
                     //printf("%f - ", din);
                     mat_adja[i][j] = 1;
@@ -238,11 +237,6 @@ double distancia_euclidiana(Planta flor1, Planta flor2){
     return dis;
 }
 
-double distancia_euclidiana_norm(Planta flor1, Planta flor2, double menor_DE, double maior_DE){
-    double disAux = sqrt(pow((flor1.splen - flor2.splen),2) + pow((flor1.spwid - flor2.spwid),2) 
-    + pow((flor1.ptlen - flor2.ptlen),2) + pow((flor1.ptwid - flor2.ptwid),2));
-
-    double dis = (disAux - menor_DE)/(maior_DE - menor_DE);
-
-    return dis;
+double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE){
+    return (dis - menor_DE)/(maior_DE - menor_DE);
 }
