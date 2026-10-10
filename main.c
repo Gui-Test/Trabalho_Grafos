@@ -17,7 +17,7 @@ typedef struct planta{
 
 void zera(double mat[Tam][Tam]);
 double distancia_euclidiana(Planta flor1, Planta flor2);
-double distancia_euclidiana_norm(Planta flor1, Planta flor2, double menor_DE, double maior_DE);
+double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE);
 void distEucIt(Planta flor[],double* menor_DE, double* maior_DE,double mat_adja[Tam][Tam], int vertsMenor[2], int vertsMaior[2]);
 void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, double mat_adja[Tam][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
 void graus(double mat_adja[Tam][Tam], int *max_grau, int *min_grau);
@@ -148,7 +148,7 @@ void distEucIt(Planta flor[], double* menor_DE, double* maior_DE,double mat_adja
             if(din< *menor_DE){
                 *menor_DE = din;
                 vertsMenor[0] = flor[i].numVert;
-                vertsMaior[1] = flor[j].numVert;
+                vertsMenor[1] = flor[j].numVert;
             }
             
             mat_adja[i][j] = din;
@@ -161,11 +161,10 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, double mat_a
     int i,j;
     for(i=0; i<Tam ; i++){
         for(j= i; j<Tam ; j++){
-            //calculo da distancia lá
+            //calculo da distancia normalizada
             
-
             if(i != j){
-                double din = distancia_euclidiana_norm(flor[i],flor[j], menor_DE, maior_DE);
+                double din = distancia_euclidiana_norm(mat_adja[i][j], menor_DE, maior_DE);
                 if(din <= 0.3){
                     mat_adja[i][j] = 1;
                     mat_adja[j][i] = 1;
@@ -182,7 +181,7 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, double mat_a
                 if(din< *menor_DENorm){
                     *menor_DENorm = din;
                     vertsMenorNorm[0] = flor[i].numVert;
-                    vertsMaiorNorm[1] = flor[j].numVert;
+                    vertsMenorNorm[1] = flor[j].numVert;
                 }
 
             }else{
@@ -229,11 +228,6 @@ double distancia_euclidiana(Planta flor1, Planta flor2){
     return dis;
 }
 
-double distancia_euclidiana_norm(Planta flor1, Planta flor2, double menor_DE, double maior_DE){
-    double disAux = sqrt(pow((flor1.splen - flor2.splen),2) + pow((flor1.spwid - flor2.spwid),2) 
-    + pow((flor1.ptlen - flor2.ptlen),2) + pow((flor1.ptwid - flor2.ptwid),2));
-
-    double dis = (disAux - menor_DE)/(maior_DE - menor_DE);
-
-    return dis;
+double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE){
+    return (dis - menor_DE)/(maior_DE - menor_DE);
 }
