@@ -15,17 +15,19 @@ typedef struct planta{
     double ptwid;
 } Planta;
 
-void zera(int mat[Tam][Tam]);
+void zera(double mat[Tam][Tam]);
 double distancia_euclidiana(Planta flor1, Planta flor2);
 double distancia_euclidiana_norm(Planta flor1, Planta flor2, double menor_DE, double maior_DE);
-void distEucIt( Planta flor[],double* menor_DE, double* maior_DE, int vertsMenor[2], int vertsMaior[2]);
-void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, int mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
+void distEucIt(Planta flor[],double* menor_DE, double* maior_DE,double mat_adja[Tam][Tam], int vertsMenor[2], int vertsMaior[2]);
+void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, double mat_adja[Tam][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
+void graus(double mat_adja[Tam][Tam], int *max_grau, int *min_grau);
 
 int main(){
     Planta flor[Tam];
-    double maior_DE = 0.0, menor_DE = 2132103215464, maior_DENorm = 0.0, menor_DENorm = 2132103215464;
+    double maior_DE = 0.0, menor_DE = 2132103, maior_DENorm = 0.0, menor_DENorm = 2132103;
     int vertMaiorDist[2], vertMenorDist[2], vertMaiorDistNorm[2], vertMenorDistNorm[2];
-    int mat_adja[Tam][Tam], numVerticies = 0;
+    int n_arestas = 0, max_grau = 0, min_grau = 2132512;
+    double mat_adja[Tam][Tam], numVerticies = 0;
     
     zera(mat_adja);
 
@@ -36,6 +38,7 @@ int main(){
     
     if(f == NULL){
         printf("Arquivo Iris não encontrado");
+        return 1;
     }
 
     fgets(linha,250, f);
@@ -55,59 +58,81 @@ int main(){
         sscanf(bloco,"%lf", &flor[i].ptlen);
         bloco = strtok(NULL, ",");
         sscanf(bloco,"%lf", &flor[i].ptwid);
-
-        /*
-        printf("%lf\n", flor[i].splen);
-        printf("%lf\n", flor[i].spwid);
-        printf("%lf\n", flor[i].ptlen);
-        printf("%lf\n\n", flor[i].ptwid);
-        */
         
     }
 
-    distEucIt(flor,&menor_DE, &maior_DE, vertMenorDist, vertMaiorDist);
+    fclose(f);
+
+    distEucIt(flor,&menor_DE, &maior_DE, mat_adja, vertMenorDist, vertMaiorDist);
     printf("Maior Dist: %f e Menor Dist: %f\n", maior_DE, menor_DE);
     distEucItNorm(flor,menor_DE, maior_DE, mat_adja, &menor_DENorm, &maior_DENorm, vertMenorDistNorm, vertMaiorDistNorm);
+    printf("Maior DistNorm: %f e Menor Dist Norm: %f\n", maior_DENorm, menor_DENorm);
+    graus(mat_adja,&max_grau,&min_grau);
+    printf("Maior Grau: %i e Menor Grau: %i\n", max_grau, min_grau);
 
     
 
     //------------ vai ser a função para colocar o grafo no csv -------------
-    /*
     f = fopen("grafo.csv", "w");
-    char linha[250];
-    char *bloco;
 
     if(f == NULL){
-        printf("Arquivo Iris não encontrado");
+        printf("Csv de grafo não criado");
         return 1;
     }
-    */
 
-    //fprintf(f, );
+
+    fprintf(f,"Menor DE,Maior DE,Menor DES,Maior DES,Maior Grau,Menor Grau\n");
+    fprintf(f,"%lf(%i %i),", menor_DE, vertMenorDist[0],vertMenorDist[1]);
+    fprintf(f,"%lf (%i %i),", maior_DE, vertMaiorDist[0],vertMaiorDist[1]);
+    fprintf(f,"%lf(%i %i),", menor_DENorm, vertMenorDistNorm[0],vertMenorDistNorm[1]);
+    fprintf(f,"%lf (%i %i),", maior_DENorm, vertMaiorDistNorm[0],vertMaiorDistNorm[1]);
+    fprintf(f,"%i,%i\n\n",max_grau,min_grau);
+    fprintf(f,"Vi, Vj\n");
 
     for(int i=0;i<Tam;i++){
-        
-        //printf("%s\n", bloco);
-        //sscanf(bloco,"%c", &flor[i].especie);
-        
-
-        /*
-        printf("%lf\n", flor[i].splen);
-        printf("%lf\n", flor[i].spwid);
-        printf("%lf\n", flor[i].ptlen);
-        printf("%lf\n\n", flor[i].ptwid);
-        */
-        
+        int j = 0;
+        while(j<=i){
+            if (mat_adja[i][j] == 1){
+                n_arestas++;
+                fprintf(f,"%i,%i\n", i, j);
+            }
+            j++;
+        }
     }
-
-    
 
     fclose(f);
 
-    
+    //------------ txt do grafo para visualizar no grafo -------------
+    f = fopen("grafo.txt", "w");
 
+    if(f == NULL){
+        printf("Txt de grafo não criado");
+        return 1;
+    }
+
+    fprintf(f, "%i\n", n_arestas);
+
+    for(int i=0;i<Tam;i++){
+        int j = 0;
+        while(j<=i){
+            if (mat_adja[i][j] == 1){
+                fprintf(f,"%i %i\n", i, j);
+            }
+            j++;
+        }
+    }
+
+
+    fclose(f);
 }
-void distEucIt(Planta flor[], double* menor_DE, double* maior_DE, int vertsMenor[2], int vertsMaior[2]){
+
+
+
+
+
+
+
+void distEucIt(Planta flor[], double* menor_DE, double* maior_DE,double mat_adja[Tam][Tam], int vertsMenor[2], int vertsMaior[2]){
     for(int i=0; i<Tam ; i++){
         for(int j=i + 1; j<Tam ; j++){
             //calculo da distancia lá
@@ -130,14 +155,16 @@ void distEucIt(Planta flor[], double* menor_DE, double* maior_DE, int vertsMenor
             
         }
     }
+}
 
-void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
-    for(int i=0; i<Tam ; i++){
-        for(int j= i; j<Tam ; j++){
+void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, double mat_adja[Tam][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]){
+    int i,j;
+    for(i=0; i<Tam ; i++){
+        for(j= i; j<Tam ; j++){
             //calculo da distancia lá
             
 
-            if( i != j){
+            if(i != j){
                 double din = distancia_euclidiana_norm(flor[i],flor[j], menor_DE, maior_DE);
                 if(din <= 0.3){
                     mat_adja[i][j] = 1;
@@ -162,17 +189,32 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, int mat_adja
                 mat_adja[i][j] = 0;
             }
             
-            //agora precisamos descobrir como normalizar isso...
-            
-            
-            
+                
             
         }
     }
 
 }
 
-void zera(int mat[Tam][Tam]){
+//Maior e menor grau
+void graus(double mat_adja[Tam][Tam], int *max_grau, int *min_grau){
+    for(int i=0; i<Tam ; i++){
+        int grau_atual = 0;
+        for(int j = 0; j<Tam ; j++){
+            if(mat_adja[i][j] == 1){
+                grau_atual++;
+            }
+        }
+        if(grau_atual>*max_grau){
+            *max_grau = grau_atual;
+        }
+        if(grau_atual<*min_grau){
+            *min_grau = grau_atual;
+        }
+    }
+}
+
+void zera(double mat[Tam][Tam]){
     for(int i=0; i<Tam ; i++){
         for(int j=0; j<Tam ; j++){
             mat[i][j] = 0;
