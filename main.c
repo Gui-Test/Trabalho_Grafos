@@ -5,7 +5,7 @@
 #include <math.h>
 
 #define Tam 150
-
+bool visitado[Tam];
 typedef struct planta{
     int numVert;
     char especie[15];
@@ -21,6 +21,8 @@ double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE);
 void distEucIt(Planta flor[],double* menor_DE, double* maior_DE,double mat_adja[][Tam], int vertsMenor[2], int vertsMaior[2]);
 void distEucItNorm( Planta flor[], double menor_DE, double maior_DE, double mat_adja[][Tam], double* menor_DENorm, double* maior_DENorm, int vertsMenorNorm[2], int vertsMaiorNorm[2]);
 void graus(double mat_adja[Tam][Tam], int *max_grau, int *min_grau);
+int dfs(int v, double mat_adja[][Tam], bool visitado[Tam]);
+int componentes(double mat_adja[][Tam], bool visitado[Tam], int tamanhos[Tam], int *qtd_componentes);
 
 int main(){
     Planta flor[Tam];
@@ -28,6 +30,9 @@ int main(){
     int vertMaiorDist[2], vertMenorDist[2], vertMaiorDistNorm[2], vertMenorDistNorm[2];
     int n_arestas = 0, max_grau = 0, min_grau = 2132512;
     double mat_adja[Tam][Tam], numVerticies = 0;
+    
+    int tamanhos[Tam];
+    int qtd_componentes = 0;
     
     zera(mat_adja);
 
@@ -69,7 +74,8 @@ int main(){
     printf("Maior DistNorm: %f e Menor Dist Norm: %f\n", maior_DENorm, menor_DENorm);
     graus(mat_adja,&max_grau,&min_grau);
     printf("Maior Grau: %i e Menor Grau: %i\n", max_grau, min_grau);
-
+    //componentes(mat_adja, visitado, tamanhos, &qtd_componentes);
+    //printf("Qtd de componentes: %i ", qtd_componentes);
     
 
     //------------ vai ser a função para colocar o grafo no csv -------------
@@ -81,23 +87,27 @@ int main(){
     }
 
 
-    fprintf(f,"Menor DE,Maior DE,Menor DES,Maior DES,Maior Grau,Menor Grau\n");
+    fprintf(f,"Menor DE,Maior DE,Menor DES,Maior DES,Maior Grau,Menor Grau, Qtd Componente(s)\n");
     fprintf(f,"%lf(%i %i),", menor_DE, vertMenorDist[0],vertMenorDist[1]);
     fprintf(f,"%lf (%i %i),", maior_DE, vertMaiorDist[0],vertMaiorDist[1]);
     fprintf(f,"%lf(%i %i),", menor_DENorm, vertMenorDistNorm[0],vertMenorDistNorm[1]);
     fprintf(f,"%lf (%i %i),", maior_DENorm, vertMaiorDistNorm[0],vertMaiorDistNorm[1]);
-    fprintf(f,"%i,%i\n\n",max_grau,min_grau);
-    fprintf(f,"Vi, Vj\n");
+    fprintf(f,"%i,%i,",max_grau,min_grau);
+    fprintf(f,"%i\n\n",qtd_componentes);
+    
+    for(int i=1;i<=Tam;i++){
+        fprintf(f,"%i,", i); 
+    }
 
-    for(int i=0;i<Tam;i++){
-        int j = 0;
-        while(j<=i){
-            if (mat_adja[i][j] == 1){
-                n_arestas++;
-                fprintf(f,"%i,%i\n", i, j);
-            }
-            j++;
+    for (int i = 0; i < Tam; i++) {
+        fprintf(f, "%d", i);
+
+        for (int j = 0; j < Tam; j++) {
+           
+            fprintf(f, ";%f", mat_adja[i][j]);
         }
+
+        fprintf(f, "\n");
     }
 
     fclose(f);
@@ -171,16 +181,19 @@ void distEucItNorm(Planta flor[], double menor_DE, double maior_DE, double mat_a
             //calculo da distancia lá
             
             if(i != j){
-                double din = distancia_euclidiana_norm(mat_adja[i][j], menor_DE, maior_DE);
+                double dis = distancia_euclidiana(flor[i], flor[j]);
+                double din = distancia_euclidiana_norm(dis, menor_DE, maior_DE);
                 if(din <= 0.3){
-                    //printf("%f - ", din);
+                    printf("%f - ", din);
                     mat_adja[i][j] = 1;
                     mat_adja[j][i] = 1;
                     fprintf(f,"%i %i\n",flor[i].numVert,flor[j].numVert);
+
                 }else{
                     mat_adja[i][j] = 0;
                     mat_adja[j][i] = 0;
                 }
+                //printf("Vertices: %d e %d | Distancia: %.4f | Normalizada: %.4f\n", flor[i].numVert, flor[j].numVert, dis, din);
 
                 if(din> *maior_DENorm){
                     *maior_DENorm = din;
@@ -239,4 +252,44 @@ double distancia_euclidiana(Planta flor1, Planta flor2){
 
 double distancia_euclidiana_norm(double dis, double menor_DE, double maior_DE){
     return (dis - menor_DE)/(maior_DE - menor_DE);
+}
+
+
+
+int dfs(int v, double mat_adja[][Tam], bool visitado[Tam]) {
+    visitado[v] = 1;
+    int tamanho = 1;
+
+    for (int u = 0; u < Tam; u++) {
+        if (mat_adja[v][u] == 1 && !visitado[u]) {
+            tamanho += dfs(u, mat_adja, visitado);
+        }
+    }
+
+    return tamanho;
+}
+
+int componentes(double mat_adja[][Tam], bool visitado[Tam], int tamanhos[Tam], int *qtd_componentes) {
+    
+    for (int i = 0; i < Tam; i++) {
+        printf("%i ",visitado[i]) ;
+           
+    }
+
+    for (int i = 0; i < Tam; i++) {
+        if (!visitado[i]) {
+            tamanhos[*qtd_componentes] = dfs(i, mat_adja, visitado);
+            (*qtd_componentes)++;
+        }
+    }
+
+    printf("Quantidade de componentes: %d\n",
+           *qtd_componentes);
+
+    for (int i = 0; i < *qtd_componentes; i++) {
+        printf("Componente %d: %d vertices\n",
+               i + 1, tamanhos[i]);
+    }
+
+    return 0;
 }
